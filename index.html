@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpiceDelight - Premium Homemade Mukhwas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .hero-bg {
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1586201375761-83865001e31c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .product-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .fade-in {
+            animation: fadeIn 1s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .slide-up {
+            animation: slideUp 0.8s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .pulse-glow {
+            animation: pulseGlow 2s infinite;
+        }
+        
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 5px rgba(234, 88, 12, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(234, 88, 12, 0.8); }
+            100% { box-shadow: 0 0 5px rgba(234, 88, 12, 0.5); }
+        }
+        
+        .admin-panel {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-amber-50">
+    <!-- Navigation -->
+    <nav class="bg-amber-900 text-white p-4 sticky top-0 z-50 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center">
+                <i class="fas fa-pepper-hot text-amber-400 text-2xl mr-2"></i>
+                <h1 class="text-xl font-bold">SpiceDelight</h1>
+            </div>
+            
+            <div class="hidden md:flex space-x-6">
+                <a href="#home" class="hover:text-amber-300 transition-colors">Home</a>
+                <a href="#products" class="hover:text-amber-300 transition-colors">Products</a>
+                <a href="#about" class="hover:text-amber-300 transition-colors">About</a>
+                <a href="#gallery" class="hover:text-amber-300 transition-colors">Gallery</a>
+                <a href="#contact" class="hover:text-amber-300 transition-colors">Contact</a>
+                <button id="adminLoginBtn" class="bg-amber-600 hover:bg-amber-700 px-3 py-1 rounded transition-colors">Admin</button>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <button class="md:hidden text-white" id="mobileMenuBtn">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="md:hidden bg-amber-800 mt-2 p-4 rounded-lg hidden" id="mobileMenu">
+            <div class="flex flex-col space-y-3">
+                <a href="#home" class="hover:text-amber-300 transition-colors">Home</a>
+                <a href="#products" class="hover:text-amber-300 transition-colors">Products</a>
+                <a href="#about" class="hover:text-amber-300 transition-colors">About</a>
+                <a href="#gallery" class="hover:text-amber-300 transition-colors">Gallery</a>
+                <a href="#contact" class="hover:text-amber-300 transition-colors">Contact</a>
+                <button id="adminLoginBtnMobile" class="bg-amber-600 hover:bg-amber-700 px-3 py-1 rounded transition-colors text-left w-20">Admin</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-bg text-white py-20 md:py-32 fade-in">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6 slide-up">Premium Homemade Mukhwas</h1>
+            <p class="text-xl md:text-2xl mb-8 max-w-2xl mx-auto slide-up">Experience the authentic taste of traditional Indian mouth fresheners, crafted with love and the finest ingredients.</p>
+            <div class="flex justify-center space-x-4 slide-up">
+                <a href="#products" class="bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors pulse-glow">Shop Now</a>
+                <a href="#about" class="bg-transparent border-2 border-white hover:bg-white hover:text-amber-900 text-white px-6 py-3 rounded-lg font-semibold transition-colors">Learn More</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section id="products" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center text-amber-900 mb-12">Our Premium Mukhwas Collection</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="productsContainer">
+                <!-- Products will be loaded dynamically from Firebase -->
+                <div class="product-card bg-amber-50 rounded-xl overflow-hidden shadow-lg border border-amber-200">
+                    <div class="h-48 bg-amber-200 flex items-center justify-center">
+                        <i class="fas fa-spinner fa-spin text-amber-600 text-4xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-amber-900 mb-2">Loading...</h3>
+                        <p class="text-amber-700 mb-4">Please wait while we load our products</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-amber-800 font-bold">₹---</span>
+                            <button class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg transition-colors">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-16 bg-amber-100">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center text-amber-900 mb-12">Our Story</h2>
+            
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-8 md:mb-0 md:pr-8">
+                    <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Mukhwas Making Process" class="rounded-xl shadow-lg w-full">
+                </div>
+                
+                <div class="md:w-1/2">
+                    <h3 class="text-2xl font-bold text-amber-800 mb-4">Traditional Recipes, Modern Quality</h3>
+                    <p class="text-amber-700 mb-4">For generations, our family has been crafting authentic mukhwas using traditional methods passed down through the years. We combine these time-honored techniques with modern quality standards to bring you the finest mouth fresheners.</p>
+                    <p class="text-amber-700 mb-6">Each batch is carefully prepared with the highest quality ingredients, ensuring a perfect blend of flavors that awaken your senses and leave your mouth feeling fresh and clean.</p>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-seedling text-amber-600 text-xl mr-3"></i>
+                            <span class="text-amber-800">100% Natural Ingredients</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-heart text-amber-600 text-xl mr-3"></i>
+                            <span class="text-amber-800">Made with Love</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-award text-amber-600 text-xl mr-3"></i>
+                            <span class="text-amber-800">Premium Quality</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-truck text-amber-600 text-xl mr-3"></i>
+                            <span class="text-amber-800">Free Shipping</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center text-amber-900 mb-12">Mukhwas Making Process</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="rounded-xl overflow-hidden shadow-lg transform transition-transform hover:scale-105">
+                    <img src="https://images.unsplash.com/photo-1586201375761-83865001e31c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Mukhwas Ingredients" class="w-full h-64 object-cover">
+                    <div class="p-4 bg-amber-50">
+                        <h3 class="font-bold text-amber-800">Ingredient Selection</h3>
+                        <p class="text-amber-700 text-sm">We carefully select the finest fennel seeds, sesame seeds, and other natural ingredients.</p>
+                    </div>
+                </div>
+                
+                <div class="rounded-xl overflow-hidden shadow-lg transform transition-transform hover:scale-105">
+                    <img src="https://images.unsplash.com/photo-1598965675045-8b5d8dd62b1b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Mukhwas Preparation" class="w-full h-64 object-cover">
+                    <div class="p-4 bg-amber-50">
+                        <h3 class="font-bold text-amber-800">Traditional Preparation</h3>
+                        <p class="text-amber-700 text-sm">Our mukhwas is prepared using traditional methods that enhance the natural flavors.</p>
+                    </div>
+                </div>
+                
+                <div class="rounded-xl overflow-hidden shadow-lg transform transition-transform hover:scale-105">
+                    <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Mukhwas Packaging" class="w-full h-64 object-cover">
+                    <div class="p-4 bg-amber-50">
+                        <h3 class="font-bold text-amber-800">Quality Packaging</h3>
+                        <p class="text-amber-700 text-sm">Each batch is carefully packaged to preserve freshness and flavor.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-16 bg-amber-900 text-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">Get In Touch</h2>
+            
+            <div class="flex flex-col md:flex-row justify-between">
+                <div class="md:w-1/2 mb-8 md:mb-0">
+                    <h3 class="text-2xl font-bold mb-4">Contact Information</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-map-marker-alt text-amber-400 mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-bold">Address</h4>
+                                <p>123 Spice Street, Flavor Town, India 400001</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-phone text-amber-400 mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-bold">Phone</h4>
+                                <p>+91 98765 43210</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-envelope text-amber-400 mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-bold">Email</h4>
+                                <p>info@spicedelight.com</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8">
+                        <h3 class="text-2xl font-bold mb-4">Follow Us</h3>
+                        <div class="flex space-x-4">
+                            <a href="#" class="bg-amber-800 hover:bg-amber-700 w-10 h-10 rounded-full flex items-center justify-center transition-colors">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="#" class="bg-amber-800 hover:bg-amber-700 w-10 h-10 rounded-full flex items-center justify-center transition-colors">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="#" class="bg-amber-800 hover:bg-amber-700 w-10 h-10 rounded-full flex items-center justify-center transition-colors">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="bg-amber-800 hover:bg-amber-700 w-10 h-10 rounded-full flex items-center justify-center transition-colors">
+                                <i class="fab fa-whatsapp"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="md:w-1/2 md:pl-8">
+                    <h3 class="text-2xl font-bold mb-4">Send us a Message</h3>
+                    <form id="contactForm" class="space-y-4">
+                        <div>
+                            <label for="name" class="block mb-1">Your Name</label>
+                            <input type="text" id="name" class="w-full px-4 py-2 rounded-lg bg-amber-800 border border-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-400" required>
+                        </div>
+                        <div>
+                            <label for="email" class="block mb-1">Your Email</label>
+                            <input type="email" id="email" class="w-full px-4 py-2 rounded-lg bg-amber-800 border border-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-400" required>
+                        </div>
+                        <div>
+                            <label for="message" class="block mb-1">Your Message</label>
+                            <textarea id="message" rows="4" class="w-full px-4 py-2 rounded-lg bg-amber-800 border border-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-400" required></textarea>
+                        </div>
+                        <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-amber-950 text-amber-200 py-8">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2023 SpiceDelight - Premium Homemade Mukhwas. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Admin Login Modal -->
+    <div id="adminLoginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl p-8 w-full max-w-md">
+            <h2 class="text-2xl font-bold text-amber-900 mb-6">Admin Login</h2>
+            <form id="adminLoginForm">
+                <div class="mb-4">
+                    <label for="adminEmail" class="block text-amber-800 mb-2">Email</label>
+                    <input type="email" id="adminEmail" class="w-full px-4 py-2 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" required>
+                </div>
+                <div class="mb-6">
+                    <label for="adminPassword" class="block text-amber-800 mb-2">Password</label>
+                    <input type="password" id="adminPassword" class="w-full px-4 py-2 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" required>
+                </div>
+                <div class="flex justify-between">
+                    <button type="button" id="closeAdminModal" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">Cancel</button>
+                    <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg transition-colors">Login</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPanel" class="admin-panel fixed inset-0 bg-amber-50 z-50 overflow-y-auto">
+        <div class="container mx-auto px-4 py-8">
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-3xl font-bold text-amber-900">Admin Panel</h1>
+                <button id="logoutBtn" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg transition-colors">Logout</button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Add Product Form -->
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h2 class="text-2xl font-bold text-amber-800 mb-4">Add New Product</h2>
+                    <form id="addProductForm">
+                        <div class="mb-4">
+                            <label for="productName" class="block text-amber-700 mb-2">Product Name</label>
+                            <input type="text" id="productName" class="w-full px-4 py-2 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="productDescription" class="block text-amber-700 mb-2">Description</label>
+                            <textarea id="productDescription" rows="3" class="w-full px-4 py-2 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" required></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label for="productPrice" class="block text-amber-700 mb-2">Price (₹)</label>
+                            <input type="number" id="productPrice" class="w-full px-4 py-2 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="productImage" class="block text-amber-700 mb-2">Image URL</label>
+                            <input type="text" id="productImage" class="w-full px-4 py-2 border border-amber-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" required>
+                        </div>
+                        <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg transition-colors w-full">Add Product</button>
+                    </form>
+                </div>
+                
+                <!-- Products List -->
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h2 class="text-2xl font-bold text-amber-800 mb-4">Manage Products</h2>
+                    <div id="adminProductsList" class="space-y-4 max-h-96 overflow-y-auto">
+                        <!-- Products will be loaded here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Orders Section -->
+            <div class="bg-white p-6 rounded-xl shadow-lg mt-8">
+                <h2 class="text-2xl font-bold text-amber-800 mb-4">Customer Orders</h2>
+                <div id="ordersList" class="space-y-4">
+                    <!-- Orders will be loaded here -->
+                    <p class="text-amber-700 text-center py-4">No orders yet.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Configuration and App Logic -->
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDummyAPIKeyForExampleOnly",
+            authDomain: "mukhwas-business.firebaseapp.com",
+            projectId: "mukhwas-business",
+            storageBucket: "mukhwas-business.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdefghijklmnop"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        
+        // DOM Elements
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const adminLoginBtn = document.getElementById('adminLoginBtn');
+        const adminLoginBtnMobile = document.getElementById('adminLoginBtnMobile');
+        const adminLoginModal = document.getElementById('adminLoginModal');
+        const closeAdminModal = document.getElementById('closeAdminModal');
+        const adminLoginForm = document.getElementById('adminLoginForm');
+        const adminPanel = document.getElementById('adminPanel');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const productsContainer = document.getElementById('productsContainer');
+        const addProductForm = document.getElementById('addProductForm');
+        const adminProductsList = document.getElementById('adminProductsList');
+        const ordersList = document.getElementById('ordersList');
+        const contactForm = document.getElementById('contactForm');
+
+        // Toggle Mobile Menu
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Show Admin Login Modal
+        const showAdminLoginModal = () => {
+            adminLoginModal.classList.remove('hidden');
+        };
+
+        adminLoginBtn.addEventListener('click', showAdminLoginModal);
+        adminLoginBtnMobile.addEventListener('click', showAdminLoginModal);
+
+        // Close Admin Login Modal
+        closeAdminModal.addEventListener('click', () => {
+            adminLoginModal.classList.add('hidden');
+        });
+
+        // Admin Login
+        adminLoginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            
+            // For demo purposes, using a simple check
+            // In a real app, this would use Firebase Authentication
+            if (email === 'admin@spicedelight.com' && password === 'admin123') {
+                adminLoginModal.classList.add('hidden');
+                adminPanel.style.display = 'block';
+                loadAdminProducts();
+                loadOrders();
+            } else {
+                alert('Invalid credentials. For demo, use: admin@spicedelight.com / admin123');
+            }
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', () => {
+            adminPanel.style.display = 'none';
+        });
+
+        // Load Products for Main Site
+        const loadProducts = () => {
+            // In a real app, this would fetch from Firestore
+            // For demo, using static data
+            const products = [
+                {
+                    id: 1,
+                    name: "Classic Fennel Mukhwas",
+                    description: "Traditional fennel seeds with a hint of sweetness, perfect for daily use.",
+                    price: 199,
+                    image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
+                },
+                {
+                    id: 2,
+                    name: "Special Masala Mukhwas",
+                    description: "A flavorful blend of fennel, sesame, and exotic spices for a unique taste.",
+                    price: 249,
+                    image: "https://images.unsplash.com/photo-1598965675045-8b5d8dd62b1b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
+                },
+                {
+                    id: 3,
+                    name: "Sweet Coconut Mukhwas",
+                    description: "Delicious coconut flakes with fennel and cardamom for a sweet aftertaste.",
+                    price: 299,
+                    image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
+                },
+                {
+                    id: 4,
+                    name: "Premium Pan Masala",
+                    description: "Our signature blend with betel leaves and aromatic spices for a refreshing experience.",
+                    price: 349,
+                    image: "https://images.unsplash.com/photo-1570194065650-1d49aa03f9f0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
+                },
+                {
+                    id: 5,
+                    name: "Herbal Digestive Mix",
+                    description: "A special formulation with digestive herbs to aid digestion after meals.",
+                    price: 279,
+                    image: "https://images.unsplash.com/photo-1594135710128-4d6b6f674de5?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
+                },
+                {
+                    id: 6,
+                    name: "Assorted Seeds Mix",
+                    description: "A colorful mix of various seeds and dried fruits for a festive treat.",
+                    price: 399,
+                    image: "https://images.unsplash.com/photo-1570194065650-1d49aa03f9f0?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
+                }
+            ];
+            
+            productsContainer.innerHTML = '';
+            
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card bg-amber-50 rounded-xl overflow-hidden shadow-lg border border-amber-200';
+                productCard.innerHTML = `
+                    <div class="h-48 bg-amber-200 overflow-hidden">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-amber-900 mb-2">${product.name}</h3>
+                        <p class="text-amber-700 mb-4">${product.description}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-amber-800 font-bold">₹${product.price}</span>
+                            <button class="add-to-cart bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg transition-colors" data-id="${product.id}">Add to Cart</button>
+                        </div>
+                    </div>
+                `;
+                productsContainer.appendChild(productCard);
+            });
+            
+            // Add event listeners to Add to Cart buttons
+            document.querySelectorAll('.add-to-cart').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const productId = e.target.getAttribute('data-id');
+                    alert(`Product ${productId} added to cart!`);
+                    // In a real app, this would add to a cart system
+                });
+            });
+        };
+
+        // Load Products for Admin Panel
+        const loadAdminProducts = () => {
+            // In a real app, this would fetch from Firestore
+            // For demo, using the same static data
+            const products = [
+                {
+                    id: 1,
+                    name: "Classic Fennel Mukhwas",
+                    description: "Traditional fennel seeds with a hint of sweetness, perfect for daily use.",
+                    price: 199,
+                    image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
+                },
+                {
+                    id: 2,
+                    name: "Special Masala Mukhwas",
+                    description: "A flavorful blend of fennel, sesame, and exotic spices for a unique taste.",
+                    price: 249,
+                    image: "https://images.unsplash.com/photo-1598965675045-8b5d8dd62b1b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
+                },
+                {
+                    id: 3,
+                    name: "Sweet Coconut Mukhwas",
+                    description: "Delicious coconut flakes with fennel and cardamom for a sweet aftertaste.",
+                    price: 299,
+                    image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
+                }
+            ];
+            
+            adminProductsList.innerHTML = '';
+            
+            products.forEach(product => {
+                const productItem = document.createElement('div');
+                productItem.className = 'bg-amber-50 p-4 rounded-lg border border-amber-200';
+                productItem.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div class="flex items-start">
+                            <img src="${product.image}" alt="${product.name}" class="w-16 h-16 object-cover rounded-lg mr-4">
+                            <div>
+                                <h3 class="font-bold text-amber-800">${product.name}</h3>
+                                <p class="text-amber-700 text-sm">${product.description}</p>
+                                <p class="text-amber-800 font-bold mt-1">₹${product.price}</p>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="edit-product bg-amber-500 hover:bg-amber-600 text-white px-3 py-1 rounded text-sm transition-colors" data-id="${product.id}">Edit</button>
+                            <button class="delete-product bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition-colors" data-id="${product.id}">Delete</button>
+                        </div>
+                    </div>
+                `;
+                adminProductsList.appendChild(productItem);
+            });
+        };
+
+        // Load Orders
+        const loadOrders = () => {
+            // In a real app, this would fetch from Firestore
+            // For demo, showing empty state
+            ordersList.innerHTML = '<p class="text-amber-700 text-center py-4">No orders yet.</p>';
+        };
+
+        // Add Product
+        addProductForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('productName').value;
+            const description = document.getElementById('productDescription').value;
+            const price = document.getElementById('productPrice').value;
+            const image = document.getElementById('productImage').value;
+            
+            // In a real app, this would add to Firestore
+            alert(`Product "${name}" added successfully!`);
+            
+            // Reset form
+            addProductForm.reset();
+            
+            // Reload products
+            loadAdminProducts();
+        });
+
+        // Contact Form Submission
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Thank you for your message! We will get back to you soon.');
+            contactForm.reset();
+        });
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProducts();
+            
+            // Smooth scrolling for navigation links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                        
+                        // Close mobile menu if open
+                        mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
